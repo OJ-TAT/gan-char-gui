@@ -5,8 +5,8 @@ from PySide6.QtGui import QFont
 from qfluentwidgets import (ScrollArea, CardWidget, StrongBodyLabel,
                              BodyLabel, CaptionLabel, LineEdit, PushButton,
                              ComboBox, SubtitleLabel, TitleLabel,
-                             PrimaryPushButton, InfoBadge, FluentIcon,
-                             IconWidget)
+                             PrimaryPushButton, InfoBadge, InfoLevel,
+                             FluentIcon, IconWidget)
 
 
 class _InstrumentCard(CardWidget):
@@ -56,13 +56,16 @@ class _InstrumentCard(CardWidget):
 
     def _on_connect(self):
         addr = self.addr_edit.text().strip()
-        self.status_badge = InfoBadge.success('Connected', self.parent())
+        self.status_badge.setText('Connected')
+        self.status_badge.setLevel(InfoLevel.SUCCESS)
         self.info_label.setText(f'Connected → {addr}')
         self.connect_btn.setEnabled(False)
         self.disconnect_btn.setEnabled(True)
         self.addr_edit.setEnabled(False)
 
     def _on_disconnect(self):
+        self.status_badge.setText('Disconnected')
+        self.status_badge.setLevel(InfoLevel.ATTENTION)
         self.info_label.setText('Disconnected')
         self.connect_btn.setEnabled(True)
         self.disconnect_btn.setEnabled(False)

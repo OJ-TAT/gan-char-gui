@@ -150,8 +150,11 @@ class OutputInterface(BaseTestInterface):
             self._plot.set_labels('Vgs (V)', 'Ron (Ω)')
             vgs_vals = []
             ron_vals = []
+            # Use index 1 (first non-zero Vds point) for Ron calculation
+            ron_idx = 1 if len(vds_arr) > 1 else 0
             for vgs, id_arr in self._sweep_data.get('id_curves', []):
-                ron = vds_arr[0] / (id_arr[0] + 1e-12) if id_arr[0] > 1e-9 else float('nan')
+                i_at_idx = id_arr[ron_idx] if len(id_arr) > ron_idx else 0
+                ron = vds_arr[ron_idx] / (i_at_idx + 1e-12) if i_at_idx > 1e-9 else float('nan')
                 vgs_vals.append(vgs)
                 ron_vals.append(ron)
             self._plot.add_curve(np.array(vgs_vals), np.array(ron_vals),
@@ -263,9 +266,11 @@ class OutputInterface(BaseTestInterface):
         _, id_arr_max_vgs = id_curves[-1]
         id_max = np.max(id_arr_max_vgs)
 
-        # Ron from first Vds point of highest on-state curve
-        ron = (vds[1] / (id_arr_max_vgs[1] + 1e-12)
-               if id_arr_max_vgs[1] > 1e-6 else float('nan'))
+        # Ron from first non-zero Vds point of highest on-state curve
+        if len(vds) > 1 and len(id_arr_max_vgs) > 1 and id_arr_max_vgs[1] > 1e-6:
+            ron = vds[1] / (id_arr_max_vgs[1] + 1e-12)
+        else:
+            ron = float('nan')
 
         self._lbl_id_max.setText(f'{id_max*1000:.1f} mA')
         self._lbl_ron.setText(f'{ron:.2f} Ω' if not np.isnan(ron) else '—')

@@ -327,9 +327,13 @@ class GateTransferInterface(BaseTestInterface):
         idx_gm_max = np.argmax(gm)
         vth_est = vgs[idx_gm_max] - id_arr[idx_gm_max] / (gm_max + 1e-30)
 
-        # Ion/Ioff
+        # Ion/Ioff — use the lower 20% of the sweep range as the off-state region
+        vgs_min = vgs[0]
+        vgs_range = vgs[-1] - vgs_min
+        off_threshold = vgs_min + vgs_range * 0.2
+        off_mask = vgs < off_threshold
         i_on = np.max(id_arr)
-        i_off = np.max(id_arr[vgs < -6]) if np.any(vgs < -6) else 1e-9
+        i_off = np.max(id_arr[off_mask]) if np.any(off_mask) else 1e-9
         ion_ioff = i_on / (i_off + 1e-30)
 
         # Subthreshold swing (mV/dec)
